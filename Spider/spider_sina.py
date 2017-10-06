@@ -40,7 +40,6 @@ class sina:
 
     def spider_sina_feature(self):
         gif_feed_box = self.driver.find_elements_by_class_name('gif_feed_box')
- 
 
 
 
