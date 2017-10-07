@@ -78,41 +78,47 @@ class sina:
         self.driver = webdriver.PhantomJS(executable_path=self.config.phantomjs_path)
         self.gif_dir_path = self.config.work_dir + "/pic/sina_gif"
         spider_tool.create_dir(self.gif_dir_path)
+        self.result_map
 
     # 获取页上的数据
     def spider_sina_feature(self):
         gif_feed_box = self.driver.find_elements_by_class_name('gif_feed_box')
         result_list = []
-        for i in gif_feed_box:
-            h2 = i.find_element_by_tag_name('h2')
+        for i in range(len(gif_feed_box)):
+            h2 = gif_feed_box[i].find_element_by_tag_name('h2')
             gif_url = h2.find_element_by_tag_name('a').get_attribute('href')
             gif_content = h2.find_element_by_tag_name('a').text
-            ul = i.find_element_by_tag_name('ul')
+            ul = gif_feed_box[i].find_element_by_tag_name('ul')
             gif_tag = ul.find_element_by_tag_name('li').find_element_by_tag_name('a').text
-            sina_result.tag = gif_tag
-            sina_result.url = gif_url
-            sina_result.content = gif_content
-            result_list.append(sina_result)
+            result = sina_result()
+            result.tag = gif_tag
+            result.url = gif_url
+            result.content = gif_content
+            result_list.append(result)
+
         return result_list
 
     def spider_with_one_page(self, url):
         self.driver.get(url)
-        return sina.spider_sina_feature()
+        result = self.spider_sina_feature()
+        return result
 
     def spider_with_all_page(self):
         page = 1
         while page:
             page_url = '#page=%d' % page
             url = self.config.spider_url['sina'] + page_url
-            result = sina.spider_with_one_page(url)
+            result = self.spider_with_one_page(url)
 
             for i in result:
                 url = i.url
-                url_md5 = hashlib.md5(url)  # 下载链接url的MD5作为保存名字
-                save_path = self.gif_dir_path + "%s_%s.jpg" % (i.tag, url_md5)
+                url_md5 = hashlib.md5(url).hexdigest()  # 下载链接url的MD5作为保存名字
+                save_path = self.gif_dir_path + "/%s_%s.gif" % (i.tag, url_md5)
                 urllib.urlretrieve(url, save_path)
-                print save_path
                 i.web = self.config.spider_url['sina']
                 i.path = save_path
+                ret = self.sql.insert_data(i.web, i.tag, i.url, i.content, i.path)
+                if ret is False:
+                    page = 0
 
-            break
+            self.sql.commit()  # 提交事务

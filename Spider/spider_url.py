@@ -18,7 +18,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import time
+'''import time
 from selenium import webdriver
 import spider_config
 
@@ -47,5 +47,4 @@ for i in gif_feed_box:
 
 
 
-driver.close()
-
+driver.close()'''

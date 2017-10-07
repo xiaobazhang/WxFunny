@@ -24,11 +24,14 @@ from spider_config import config, sql
 
 
 def main():
-    sql.create_table()
-    sina(config, sql)
-    sina.spider_with_all_page()
+    print "Start"
+    conf = config()
+    sql1 = sql(conf)
+    sql1.create_table()
+    sina_ins = sina(conf, sql1)
+    sina_ins.spider_with_all_page()
     print "END"
 
 
-if __name__ == '__name__':
+if __name__ == '__main__':
     main()
