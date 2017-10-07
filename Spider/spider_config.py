@@ -37,6 +37,9 @@ class config:
         'sina': 'http://gif.sina.com.cn/'
     }
 
+    def __init__(self):
+        config.init(self)
+
     def init(self):
         config.system_version = platform.system()
         if config.system_version == "Windows":
@@ -75,15 +78,20 @@ class sql:
         self.c = self.cont.cursor()
 
     def create_table(self):
-        self.c.execute('''CREATE TABLE SPIDER
+        try:
+            self.c.execute('''CREATE TABLE IF NOT EXISTS SPIDER
                     (WEB            TEXT    NOT NULL,
                      TAG            TEXT    NOT NULL,
                      URL            TEXT    NOT NULL,
                      CONTENT        TEXT    NOT NULL,
                      PATH           TEXT    NOT NULL
                      );''')
+        except:
+            logging.error('create sql table error!!')
+            return False
         logging.info("create sqlite db succes!!")
         self.c.commit()
+        return True
 
     def insert_data(self, web, tag, url, content, path):
         query = 'SELECT * FROM SPIDER WHERE URL=%s' % (url)
@@ -91,7 +99,6 @@ class sql:
         if result is None:
             sql = 'INSERT INTO SPIDER (WEB, TAG, URL, CONTENT, PATH) VALUES (%s, %s, %s, %s, %s)' % (web, tag, url, content, path);
             self.c.execute(sql)
-            self.c.commit()
             logging.info("insert into spider %s,%s,%s,%s,%s",web, tag,url, content, path)
 
     def select_web(self, web):
@@ -111,18 +118,18 @@ class sql:
         return self.c.execute(sql)
 
     def select_path(self, path):
-        sql = 'SELECT * FROM SPIDER WHERE PATH=%s' % (path)
+        sql = 'SELECT * FROM SPIDER WHERE PATH=%s' % path
         return self.c.execute(sql)
 
     def delete_web(self, web):
-        sql = 'DELETE FROM SPIDER WHERE WEB=%s' % (web)
+        sql = 'DELETE FROM SPIDER WHERE WEB=%s' % web
         self.c.execute(sql)
         self.c.commit()
         logging.info("delete spider web:%s", web)
         return self.c.total_changes
 
     def delete_tag(self, tag):
-        sql = 'DELETE FROM SPIDER WHERE TAG=%s' % (tag)
+        sql = 'DELETE FROM SPIDER WHERE TAG=%s' % tag
         self.c.execute(sql)
         self.c.commit()
         logging.info("delete spider tag:%s", tag)
@@ -148,3 +155,6 @@ class sql:
         self.c.commit()
         logging.info("delete spider path:%s", path)
         return self.c.total_changes
+
+    def commit(self):
+        self.commit()

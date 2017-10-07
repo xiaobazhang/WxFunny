@@ -19,5 +19,16 @@
 # under the License.
 
 import spider_url
+from spider_sina import sina
+from spider_config import config, sql
 
-#if __name__ == '__name__':
+
+def main():
+    sql.create_table()
+    sina(config, sql)
+    sina.spider_with_all_page()
+    print "END"
+
+
+if __name__ == '__name__':
+    main()

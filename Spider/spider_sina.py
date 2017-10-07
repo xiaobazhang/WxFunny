@@ -18,11 +18,51 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+
+# 典型的sina搞笑gif的html代码
+'''
+    <div class="gif_feed_box">
+    <h2>
+        <a href="http://storage.slide.news.sina.com.cn/slidenews/77_ori/2017_40/74766_800877_921633.gif" target="_blank">养狗千日用狗一时</a>
+    </h2>
+    <div class="gif_img">
+        <a href="javascript:;" style="display: block;" dataurl="http://storage.slide.news.sina.com.cn/slidenews/77_ori/2017_40/74766_800877_921633.gif" class="gif_img_loaded" onclick="gifTool.showBigImg(this);return;">
+            <img src="http://storage.slide.news.sina.com.cn/slidenews/77_ori/2017_40/74766_800877_921633.gif" datasrc="http://storage.slide.news.sina.com.cn/slidenews/77_ori/2017_40/74766_800877_921633.gif" alt="" class="feedImg" style="height: 455px;">
+            </a>
+            <a href="javascript:;" class="gif_img_loading" style="display: none;">
+                <img src="http://n.sinaimg.cn/tech/gif/160407/160425_loading.gif" height="70" width="70" alt="">
+                </a>
+            </div>
+            <ul class="gif_tags clearfix">
+                <li>
+                    <a href="http://gif.sina.com.cn/?category=动物">动物</a>
+                </li>
+            </ul>
+            <div class="gif_feed_a clearfix">
+                <div class="left">
+                    <a href="javascript:;" class="gif_like" onclick="gifTool.subCount('kj_slidenews-album-74766-493002',this)">327</a>
+                    <a href="javascript:;" onclick="gifTool.showComment(this,'kj','slidenews-album-74766-493002');" class="gif_comment" dataid="kj:slidenews-album-74766-493002:0">10</a>
+                </div>
+                <div class="bdsharebuttonbox right bdshare-button-style1-16" data-tag="share_30" data-bd-bind="1507362546276">
+                    <a class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+                    <a class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+                    <a class="bds_more" data-cmd="more"></a>
+                </div>
+            </div>
+            <div class="sina-comment-wrap"></div>
+        </div>
+'''
+
+
 import time
 from selenium import webdriver
 from spider_config import config,sql
+import spider_tool
+import urllib
+import hashlib
 
-class sina_rsult:
+
+class sina_result:
     def __init__(self):
         self.web = ""
         self.tag = ""
@@ -36,12 +76,43 @@ class sina:
         self.config = config
         self.sql = sql
         self.driver = webdriver.PhantomJS(executable_path=self.config.phantomjs_path)
+        self.gif_dir_path = self.config.work_dir + "/pic/sina_gif"
+        spider_tool.create_dir(self.gif_dir_path)
 
-
+    # 获取页上的数据
     def spider_sina_feature(self):
         gif_feed_box = self.driver.find_elements_by_class_name('gif_feed_box')
+        result_list = []
+        for i in gif_feed_box:
+            h2 = i.find_element_by_tag_name('h2')
+            gif_url = h2.find_element_by_tag_name('a').get_attribute('href')
+            gif_content = h2.find_element_by_tag_name('a').text
+            ul = i.find_element_by_tag_name('ul')
+            gif_tag = ul.find_element_by_tag_name('li').find_element_by_tag_name('a').text
+            sina_result.tag = gif_tag
+            sina_result.url = gif_url
+            sina_result.content = gif_content
+            result_list.append(sina_result)
+        return result_list
 
+    def spider_with_one_page(self, url):
+        self.driver.get(url)
+        return sina.spider_sina_feature()
 
+    def spider_with_all_page(self):
+        page = 1
+        while page:
+            page_url = '#page=%d' % page
+            url = self.config.spider_url['sina'] + page_url
+            result = sina.spider_with_one_page(url)
 
-    def spider_with_one_page(self):
-        self.driver.get(self.config.spider_url['sina'])
+            for i in result:
+                url = i.url
+                url_md5 = hashlib.md5(url)  # 下载链接url的MD5作为保存名字
+                save_path = self.gif_dir_path + "%s_%s.jpg" % (i.tag, url_md5)
+                urllib.urlretrieve(url, save_path)
+                print save_path
+                i.web = self.config.spider_url['sina']
+                i.path = save_path
+
+            break
