@@ -78,7 +78,6 @@ class sina:
         self.driver = webdriver.PhantomJS(executable_path=self.config.phantomjs_path)
         self.gif_dir_path = self.config.work_dir + "/pic/sina_gif"
         spider_tool.create_dir(self.gif_dir_path)
-        self.result_map
 
     # 获取页上的数据
     def spider_sina_feature(self):
@@ -120,5 +119,5 @@ class sina:
                 ret = self.sql.insert_data(i.web, i.tag, i.url, i.content, i.path)
                 if ret is False:
                     page = 0
-
-            self.sql.commit()  # 提交事务
+            # page = page + 1  #翻页
+            break

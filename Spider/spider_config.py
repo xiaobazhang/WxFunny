@@ -95,65 +95,65 @@ class sql:
         return False
 
     def insert_data(self, web, tag, url, content, path):
-        query = 'SELECT * FROM SPIDER WHERE URL=%s' % (url)
+        query = "SELECT * FROM SPIDER WHERE URL='%s'" % url
         result = self.c.execute(query)
         if result is None:
-            sql = 'INSERT INTO SPIDER (WEB, TAG, URL, CONTENT, PATH) VALUES (%s, %s, %s, %s, %s)' % (web, tag, url, content, path);
+            sql = "INSERT INTO SPIDER (WEB, TAG, URL, CONTENT, PATH) VALUES ('%s', '%s', '%s', '%s', '%s')" % (
+            web, tag, url, content, path)
+            print sql
             self.c.execute(sql)
+            self.cont.commit()
             logging.info("insert into spider %s,%s,%s,%s,%s", web, tag, url, content, path)
             return True
         else:
             return False
 
     def select_web(self, web):
-        sql = 'SELECT * FROM SPIDER WHERE WEB=%s' % (web)
+        sql = "SELECT * FROM SPIDER WHERE WEB='%s'" % web
         return self.c.execute(sql)
 
     def select_tag(self, tag):
-        sql = 'SELECT * FROM SPIDER WHERE TAG=%s' % (tag)
+        sql = "SELECT * FROM SPIDER WHERE TAG='%s'" % tag
         return self.c.execute(sql)
 
     def select_url(self, url):
-        sql = 'SELECT * FROM SPIDER WHERE URL=%s' % (url)
+        sql = "SELECT * FROM SPIDER WHERE URL='%s'" % (url)
         return self.c.execute(sql)
 
     def select_content(self, content):
-        sql = 'SELECT * FROM SPIDER WHERE CONTENT=%s' % (content)
+        sql = "SELECT * FROM SPIDER WHERE CONTENT='%s'" % (content)
         return self.c.execute(sql)
 
     def select_path(self, path):
-        sql = 'SELECT * FROM SPIDER WHERE PATH=%s' % path
+        sql = "SELECT * FROM SPIDER WHERE PATH='%s'" % path
         return self.c.execute(sql)
 
     def delete_web(self, web):
-        sql = 'DELETE FROM SPIDER WHERE WEB=%s' % web
+        sql = "DELETE FROM SPIDER WHERE WEB='%s'" % web
         self.c.execute(sql)
         logging.info("delete spider web:%s", web)
         return self.cont.total_changes
 
     def delete_tag(self, tag):
-        sql = 'DELETE FROM SPIDER WHERE TAG=%s' % tag
+        sql = "DELETE FROM SPIDER WHERE TAG='%s'" % tag
         self.c.execute(sql)
         logging.info("delete spider tag:%s", tag)
         return self.cont.total_changes
 
     def delete_url(self, url):
-        sql = 'DELETE FROM SPIDER WHERE URL=%s' % (url)
+        sql = "DELETE FROM SPIDER WHERE URL='%s'" % url
         self.c.execute(sql)
         logging.info("delete spider url:%s", url)
         return self.cont.total_changes
 
     def delete_content(self, content):
-        sql = 'DELETE FROM SPIDER WHERE CONTENT=%s' % (content)
+        sql = "DELETE FROM SPIDER WHERE CONTENT='%s'" % content
         self.c.execute(sql)
         logging.info("delete spider content:%s", content)
         return self.cont.total_changes
 
     def delete_path(self, path):
-        sql = 'DELETE FROM SPIDER WHERE URL=%s' % (path)
+        sql = "DELETE FROM SPIDER WHERE URL='%s'" % path
         self.c.execute(sql)
         logging.info("delete spider path:%s", path)
         return self.cont.total_changes
-
-    def commit(self):
-        self.commit()
