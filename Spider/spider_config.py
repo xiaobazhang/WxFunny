@@ -36,6 +36,7 @@ class config:
     spider_url = {
         'sina': 'http://gif.sina.com.cn/'
     }
+    max_spider_page = 50
 
     def __init__(self):
         config.init(self)
@@ -96,11 +97,11 @@ class sql:
 
     def insert_data(self, web, tag, url, content, path):
         query = "SELECT * FROM SPIDER WHERE URL='%s'" % url
-        result = self.c.execute(query)
-        if result is None:
+        self.c.execute(query)
+        result = self.c.fetchall()
+        if len(result) == 0:
             sql = "INSERT INTO SPIDER (WEB, TAG, URL, CONTENT, PATH) VALUES ('%s', '%s', '%s', '%s', '%s')" % (
             web, tag, url, content, path)
-            print sql
             self.c.execute(sql)
             self.cont.commit()
             logging.info("insert into spider %s,%s,%s,%s,%s", web, tag, url, content, path)

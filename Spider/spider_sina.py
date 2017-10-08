@@ -92,32 +92,35 @@ class sina:
             result = sina_result()
             result.tag = gif_tag
             result.url = gif_url
+            print gif_url
             result.content = gif_content
             result_list.append(result)
 
         return result_list
 
     def spider_with_one_page(self, url):
+        print url
         self.driver.get(url)
         result = self.spider_sina_feature()
         return result
 
     def spider_with_all_page(self):
         page = 1
+        self.driver.get(self.config.spider_url['sina'])
         while page:
-            page_url = '#page=%d' % page
-            url = self.config.spider_url['sina'] + page_url
-            result = self.spider_with_one_page(url)
-
+            result = self.spider_sina_feature()
             for i in result:
                 url = i.url
                 url_md5 = hashlib.md5(url).hexdigest()  # 下载链接url的MD5作为保存名字
                 save_path = self.gif_dir_path + "/%s_%s.gif" % (i.tag, url_md5)
                 urllib.urlretrieve(url, save_path)
                 i.web = self.config.spider_url['sina']
-                i.path = save_path
+                i.path = "/pic/sina_gif/%s_%s.gif" % (i.tag, url_md5)
                 ret = self.sql.insert_data(i.web, i.tag, i.url, i.content, i.path)
                 if ret is False:
                     page = 0
-            # page = page + 1  #翻页
-            break
+            self.driver.find_element_by_xpath(
+                "//a[contains(text(),'下一页')]").click()  # selenium的xpath用法，找到包含“下一页”的a标签去点击
+            page = page + 1
+            if page > self.config.max_spider_page:
+                break
