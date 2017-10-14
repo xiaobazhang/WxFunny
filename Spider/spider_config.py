@@ -33,10 +33,11 @@ class config:
     db_name = ""
     dir_list = []
     phantomjs_path = ""
+    browsermob_proxy = ""
     spider_url = {
         'sina': 'http://gif.sina.com.cn/'
     }
-    max_spider_page = 50
+    max_spider_page = 50  # 最大单个网站爬虫翻页深度
 
     def __init__(self):
         config.init(self)
@@ -61,6 +62,8 @@ class config:
         config.dir_list = ['/log', '/pic', '/vedio', '/article', '/db']
         # 设置phantomjs的程序路径
         config.phantomjs_path = '/Users/suli/soft/phantomjs/bin/phantomjs'
+        # 设置chromedirver路径
+        config.chrome_path = '/usr/local/bin/chromedriver'
         # 创建工作子目录
         for i in config.dir_list:
             spider_tool.create_dir(config.work_dir + i)
@@ -69,7 +72,7 @@ class config:
         logging.basicConfig(filename=config.work_dir+"/log/"+config.log_name, level=logging.INFO,
                             format='%(asctime)s %(levelname)-8s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-
+        config.browsermob_proxy = "/Users/suli/soft/browsermob-proxy-2.1.4/bin/browsermob-proxy"
 
 class sql:
     def __init__(self, config):
